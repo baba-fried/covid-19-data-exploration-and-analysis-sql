@@ -45,7 +45,13 @@ contains only the fields necessary for exploratory data analysis, mortality asse
 
 * Calculated **death percentage** for COVID-19 infections (case fatality rate)
 * Focused analysis on **India** to assess likelihood of death after infection
-
+```sql
+Select Location, date, total_cases,total_deaths, (total_deaths/total_cases)*100 as DeathPercentage
+From CovidProject..CovidDeaths
+Where location like '%India%'
+and continent is not null 
+order by date
+```
 ### 3. Infection Rate Analysis
 
 * Computed the **percentage of population infected** by country
