@@ -56,28 +56,106 @@ order by date
 
 * Computed the **percentage of population infected** by country
 * Identified countries with the **highest infection rates relative to population**
+```sql
+Select Location, date, Population, total_cases,  (total_cases/population)*100 as PercentPopulationInfected
+From CovidProject..CovidDeaths
+order by date
 
+Select Location, Population, MAX(total_cases) as InfectionCount,  Max((total_cases/population))*100 as PercentPopulationInfected
+From CovidProject..CovidDeaths
+Group by Location, Population
+order by PercentPopulationInfected desc
+```
 ### 4. Death Count Analysis
 
 * Ranked countries by **total death count**
 * Aggregated death counts by **continent** to identify the most affected regions
+```sql
+Select Location, MAX(cast(Total_deaths as int)) as TotalDeathCount
+From CovidProject..CovidDeaths
+Where continent is not null 
+Group by Location
+order by TotalDeathCount desc
 
+Select continent, MAX(cast(Total_deaths as int)) as TotalDeathCount
+From CovidProject..CovidDeaths
+Where continent is not null 
+Group by continent
+order by TotalDeathCount desc
+```
 ### 5. Global Impact Summary
 
 * Generated a **global overview** of cumulative cases, deaths, and overall mortality percentage
-
+```sql
+Select SUM(new_cases) as total_cases, SUM(cast(new_deaths as int)) as total_deaths, SUM(cast(new_deaths as int))/SUM(New_Cases)*100 as GlobalMoralityPercentage
+From CovidProject..CovidDeaths
+where continent is not null
+```
 ### 6. Vaccination Analysis
 
 * Joined death and vaccination datasets to analyze rollout progress
 * Calculated **rolling vaccination totals** using window functions
 * Determined **vaccination coverage as a percentage of population**
-
+```sql
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+, SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
+From CovidProject..CovidDeaths dea
+Join CovidProject..CovidVaccinations vac
+	On dea.location = vac.location
+	and dea.date = vac.date
+where dea.continent is not null 
+order by location, date
+```
 ### 7. Advanced SQL Techniques
 
 * Used **CTEs** to structure complex vaccination analysis queries
 * Created **temporary tables** for intermediate calculations
 * Built a **SQL view** for reusable vaccination analytics and future visualizations
+```sql
+With PopvsVac (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated)
+as
+(
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+, SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
+From CovidProject..CovidDeaths dea
+Join CovidProject..CovidVaccinations vac
+	On dea.location = vac.location
+	and dea.date = vac.date
+where dea.continent is not null 
+)
+Select *, (RollingPeopleVaccinated/Population)*100
+From PopvsVac
 
+Create Table #PercentPopulationVaccinated
+(
+Continent nvarchar(255),
+Location nvarchar(255),
+Date datetime,
+Population numeric,
+New_vaccinations numeric,
+RollingPeopleVaccinated numeric
+)
+
+Insert into #PercentPopulationVaccinated
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+, SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
+From CovidProject..CovidDeaths dea
+Join CovidProject..CovidVaccinations vac
+	On dea.location = vac.location
+	and dea.date = vac.date
+Select *, (RollingPeopleVaccinated/Population)*100
+From #PercentPopulationVaccinated
+
+Create View PercentPopulationVaccinated as
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+, SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
+--, (RollingPeopleVaccinated/population)*100
+From CovidProject..CovidDeaths dea
+Join CovidProject..CovidVaccinations vac
+	On dea.location = vac.location
+	and dea.date = vac.date
+where dea.continent is not null 
+```
 ---
 
 ## Insights
