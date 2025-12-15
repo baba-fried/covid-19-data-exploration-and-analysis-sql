@@ -18,10 +18,10 @@ This project performs an in-depth **exploratory data analysis (EDA)** on global 
 
 ## Dataset
 
-The project uses two tables from a COVID-19 dataset:
-
+The raw COVID-19 dataset was obtained from [Our World in Data](https://ourworldindata.org) and preprocessed to create two analytical tables— 
 * [**CovidDeaths**](Datasets/CovidDeaths.xlsx) – contains data on cases, deaths, population, location, and dates
 * [**CovidVaccinations**](Datasets/CovidVaccinations.xlsx) – contains vaccination data by location and date
+Containing only the fields necessary for exploratory data analysis, mortality assessment, and vaccination trend evaluation.
 
 ---
 
