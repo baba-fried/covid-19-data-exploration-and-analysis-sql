@@ -60,7 +60,7 @@ order by date
 Select Location, date, Population, total_cases,  (total_cases/population)*100 as PercentPopulationInfected
 From CovidProject..CovidDeaths
 order by date
----
+-------------------------------------------------------------------------------------------------------------------------------------
 Select Location, Population, MAX(total_cases) as InfectionCount,  Max((total_cases/population))*100 as PercentPopulationInfected
 From CovidProject..CovidDeaths
 Group by Location, Population
@@ -76,7 +76,7 @@ From CovidProject..CovidDeaths
 Where continent is not null 
 Group by Location
 order by TotalDeathCount desc
----
+----------------------------------------------------------------------
 Select continent, MAX(cast(Total_deaths as int)) as TotalDeathCount
 From CovidProject..CovidDeaths
 Where continent is not null 
@@ -125,7 +125,7 @@ where dea.continent is not null
 )
 Select *, (RollingPeopleVaccinated/Population)*100
 From PopvsVac
----
+--------------------------------------------------------------------------------------------------------------------------------------------
 Create Table #PercentPopulationVaccinated
 (
 Continent nvarchar(255),
@@ -135,7 +135,7 @@ Population numeric,
 New_vaccinations numeric,
 RollingPeopleVaccinated numeric
 )
----
+-----------------------------------------------------------------------------------------------------------------------------------------------
 Insert into #PercentPopulationVaccinated
 Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
 , SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
@@ -145,7 +145,7 @@ Join CovidProject..CovidVaccinations vac
 	and dea.date = vac.date
 Select *, (RollingPeopleVaccinated/Population)*100
 From #PercentPopulationVaccinated
----
+-----------------------------------------------------------------------------------------------------------------------------------------------
 Create View PercentPopulationVaccinated as
 Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
 , SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition by dea.Location Order by dea.location, dea.Date) as RollingPeopleVaccinated
